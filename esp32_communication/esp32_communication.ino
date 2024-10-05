@@ -1,5 +1,7 @@
 #include <Adafruit_SSD1306.h>
+#include <Adafruit_GFX.h>
 #include <Adafruit_Keypad.h>
+#include <SPI.h>
 
 #include <esp_now.h>
 #include <Wire.h>
@@ -9,7 +11,7 @@
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
 
-#define MAXCHARS 256
+#define MAXCHARS 168 // Num of chars that fit on oled screen
 #define ROWS 4
 #define COLS 3
 #define STAR 42
@@ -43,9 +45,9 @@ char characterTable[ROWS][COLS] = {
 
 
 //               row1   2     3     4
-byte rowPin[] = {5, 22, 19, 21};
+byte rowPin[] = {33, 25, 26, 27};
 //               col1   2     3
-byte colPin[] = {15, 2, 4};
+byte colPin[] = {21, 22, 32};
 
 Adafruit_Keypad keypad( makeKeymap(characterTable), rowPin, colPin, ROWS, COLS);
 // The keypad buttons result in the following e.bit.KEY outputs:
@@ -60,7 +62,6 @@ Adafruit_Keypad keypad( makeKeymap(characterTable), rowPin, colPin, ROWS, COLS);
 // We do special cases for * and # anyway
 
 
-//Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
 uint8_t prevKey = 0;
 int timesPressed = 0;
@@ -74,6 +75,22 @@ void setup()
   // Runs once
   Serial.begin(115200);
   keypad.begin();
+
+  Serial.println(1);
+
+  if(!display.begin(SSD1306_SWITCHCAPVCC)) {
+    Serial.println(F("SSD1306 allocation failed"));
+    for(;;); // Don't proceed, loop forever
+  }
+  Serial.println(2);
+  display.display();
+  //delay(2000);
+  Serial.println(3);
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(0, 0);
+
   msg.len = 0;
 
   // PLEASE CHANGE, ONLY FOR TESTING
@@ -97,6 +114,7 @@ void loop()
 // Based on the current read mode
 void readInput(keypadEvent e)
 {
+  Serial.println(e.bit.KEY);
   // Button is considered triggered onPress and onRelease. This ignores release
   if (keypad.justReleased(e.bit.KEY)) return;
   
@@ -215,13 +233,16 @@ void pushToDisplay()
   msg.chars[msg.len++] = toPush;
   toPush = '\0';
 
-  // Temp
+  
+
   for (int i = 0; i < msg.len; i++) {
     Serial.print(msg.chars[i]);
   }
   Serial.println();
 
-  // Update OLED
+  //display.clearDisplay();
+  display.print(msg.chars[msg.len-1]);
+  display.display();
 }
 
 // Delete the last char from the queue and screen
