@@ -136,6 +136,7 @@ void loop()
 
   if (digitalRead(RED) == HIGH)
   {
+    Serial.println("red pressed");
     deleteFromDisplay();
   }
 
@@ -351,5 +352,11 @@ void sendMessage(Msg msg, char keyword[]) {
 
   Serial.print("Encrypted message: ");
   Serial.println(encryptedMsg);
+
+  char* decryptedMsg = decryptPlayfair(encryptedMsg, keyword);
+  
+  Serial.print("Decrypted message: ");
+  Serial.println(decryptedMsg);
+  
   return;
 }
