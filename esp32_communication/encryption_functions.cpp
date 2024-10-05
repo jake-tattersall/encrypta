@@ -142,7 +142,7 @@ int prepare(char str[], int ptrs)
   return ptrs;
 }
 
-void encrypt(char str[], char keyT[5][5], int ps)
+char[] encrypt(char str[], char keyT[5][5], int ps)
 {
   int i, a[4];
   
@@ -166,10 +166,11 @@ void encrypt(char str[], char keyT[5][5], int ps)
     }
 
   }
+  return str
 }
 
-void encrypyByPlayfair(char str[], char key[])
-  {
+char[] encryptByPlayfair(char str[], char key[])
+{
     char ps, ks, keyT[5][5];
     ks = strlen(key);
     ks = removeSpaces(key,ks);
@@ -185,6 +186,6 @@ void encrypyByPlayfair(char str[], char key[])
 
     encrypt(str, keyT, ps);
 
-
+  return str[];
 
 }

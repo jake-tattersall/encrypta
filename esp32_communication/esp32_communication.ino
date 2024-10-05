@@ -143,6 +143,10 @@ void loop()
   if (digitalRead(GREEN) == HIGH)
   {
     // Send message
+    char keyword[] = "test";
+    sendMessage(msg, keyword);
+
+
   }
 }
 
@@ -331,4 +335,14 @@ void cursorPulse()
 void drawCursorBlock()
 {
   display.fillRect(display.getCursorX(), display.getCursorY(), 10, 5);
+}
+
+
+void sendMessage(msg, keyword)
+{
+  char[] encryptedMsg = encryptByPlayFair(msg.chars, keyword);
+  Serial.print("Encrypted msg: ")
+  Serial.println(encryptedMsg);
+
+
 }

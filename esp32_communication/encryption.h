@@ -14,4 +14,4 @@ int prepare(char str[], int ptrs);
 
 void encrypt(char str[], char keyT[5][5], int ps);
 
-void encrypyByPlayfair(char str[], char key[]);
+void encryptByPlayfair(char str[], char key[]);
