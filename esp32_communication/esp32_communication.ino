@@ -62,7 +62,6 @@ Adafruit_Keypad keypad( makeKeymap(characterTable), rowPin, colPin, ROWS, COLS);
 // We do special cases for * and # anyway
 
 
-
 uint8_t prevKey = 0;
 int timesPressed = 0;
 char toPush = '\0';
@@ -76,16 +75,15 @@ void setup()
   Serial.begin(115200);
   keypad.begin();
 
-  Serial.println(1);
 
   if(!display.begin(SSD1306_SWITCHCAPVCC)) {
     Serial.println(F("SSD1306 allocation failed"));
     for(;;); // Don't proceed, loop forever
   }
-  Serial.println(2);
+
   display.display();
   //delay(2000);
-  Serial.println(3);
+
   display.clearDisplay();
   display.setTextSize(1);
   display.setTextColor(SSD1306_WHITE);
@@ -93,21 +91,19 @@ void setup()
 
   msg.len = 0;
 
-  // PLEASE CHANGE, ONLY FOR TESTING
+  // PLEASE CHANGE LATER, ONLY FOR TESTING
   currentMode = CHAR;
 }
 
 void loop()
 {
-  
-  
+
   // Looped code
   keypad.tick();
 
   //Serial.println(keypad.available());
   if (keypad.available())
     readInput(keypad.read());
-
 }
 
 // Get input from read key press
