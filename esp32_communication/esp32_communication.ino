@@ -6,6 +6,8 @@
 #include <esp_now.h>
 #include <Wire.h>
 
+#include <encryption.h>
+
 #define KEYPAD_PID1824
 
 #define SCREEN_WIDTH 128
@@ -251,3 +253,9 @@ void deleteFromDisplay()
 
   // Update OLED
 }
+
+
+
+
+
+
