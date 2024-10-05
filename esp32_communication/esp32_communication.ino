@@ -93,6 +93,7 @@ void readChar(keypadEvent e)
   toPush = alphabet[indx];
   Serial.print("ToPush = ");
   Serial.println(toPush);
+  
 }
 
 // Determines which number was pressed
