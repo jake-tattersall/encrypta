@@ -13,6 +13,7 @@
 #define SCREEN_HEIGHT 64
 
 #define MAXCHARS 168 // Num of chars that fit on oled screen
+#define CHARWIDTH 6
 #define ROWS 4
 #define COLS 3
 #define STAR 42
@@ -65,6 +66,11 @@ Adafruit_Keypad keypad( makeKeymap(characterTable), rowPin, colPin, ROWS, COLS);
 #define YELLOW_LED 32
 #define BLUE_LED 26
 
+int redLast = LOW;
+int greenLast = LOW;
+int blueLast = LOW;
+int yellowLast = LOW;
+
 
 uint8_t prevKey = 0;
 int timesPressed = 0;
@@ -73,8 +79,9 @@ char toPush = '\0';
 enum inputMode { CHAR, DIGIT, RECV };
 inputMode currentMode = RECV;
 
-unsigned long timeElapsed = 0;
+// unsigned long timeElapsed = 0;
 unsigned long lastTime = 0;
+bool cursor = false;
 
 void setup()
 {
@@ -110,6 +117,8 @@ void setup()
 
 void loop()
 {
+  cursorPulse();
+
   // Looped code
   keypad.tick();
 
@@ -118,29 +127,38 @@ void loop()
     readInput(keypad.read());
 
   // if blue button
-  if (digitalRead(BLUE) == HIGH)
+  int blueVal = digitalRead(BLUE);
+  if (blueVal == HIGH && blueLast == LOW)
   {
     if (currentMode == CHAR)
       currentMode = DIGIT;
     else
       currentMode = CHAR;
   }
+  blueLast = blueVal;
 
-  if (digitalRead(YELLOW) == HIGH)
+  int yellowVal = digitalRead(YELLOW);
+  if (yellowVal == HIGH && yellowLast == LOW)
   {
     if (currentMode == RECV)
       currentMode = CHAR;
-    else
+    else {
       currentMode = RECV;
+      msg.len = 0;
+    }
   }
+  yellowLast = yellowVal;
 
-  if (digitalRead(RED) == HIGH)
+  int redVal = digitalRead(RED);
+  if (redVal == HIGH && redLast == LOW)
   {
     Serial.println("red pressed");
     deleteFromDisplay();
   }
+  redLast = redVal;
 
-  if (digitalRead(GREEN) == HIGH)
+  int greenVal = digitalRead(GREEN);
+  if (greenVal == HIGH && greenLast == LOW)
   {
     // Send message
     Serial.println("green pressed");
@@ -148,9 +166,9 @@ void loop()
     char keyword[] = "test";
     
     sendMessage(msg, keyword);
-
-
   }
+  greenLast = greenVal;
+
 }
 
 void selectMode()
@@ -158,7 +176,7 @@ void selectMode()
   switch (currentMode)
   {
     case CHAR:
-      timeElapsed = 0;
+      //timeElapsed = 0;
       lastTime = millis();
       break;
     case RECV:
@@ -224,6 +242,8 @@ void readChar(keypadEvent e)
 
   Serial.print("ToPush = ");
   Serial.println(toPush);
+
+  peekToPush();
 }
 
 // Determines which number was pressed
@@ -241,7 +261,9 @@ void readDigit(keypadEvent e)
   // String intAsString = ""+key;
   // toPush = intAsString.charAt(0);
 
-  toPush = 30 + key % 12;
+  toPush = 48 + key % 12;
+
+  peekToPush();
 }
 
 // Checks if the button press was the * or #, then perform that action
@@ -283,7 +305,7 @@ void clearBuffer()
 // Write the toPush char to the queue and screen
 void pushToDisplay()
 {
-  if (toPush == '\0')
+  if (toPush == '\0' || msg.len == MAXCHARS)
     return; 
 
   msg.chars[msg.len++] = toPush;
@@ -293,9 +315,13 @@ void pushToDisplay()
   }
   Serial.println();
 
-  //display.clearDisplay();
-  display.print(msg.chars[msg.len-1]);
-  display.display();
+  // display.fillRect(display.getCursorX(), display.getCursorY(), 10, 10, SSD1306_INVERSE);
+
+  // //display.clearDisplay();
+  // display.print(msg.chars[msg.len-1]);
+  // display.display();
+
+  printMessage();
 }
 
 // Delete the last char from the queue and screen
@@ -306,10 +332,22 @@ void deleteFromDisplay()
   
   msg.len--;
 
-  adjustCursorX(true, 10);
-  display.print(' ');
+  // adjustCursorX(true, 10);
+  // display.print(' ');
+  // display.display();
+  // adjustCursorX(true, 10);
+  printMessage();
+}
+
+
+void printMessage() 
+{
+  display.clearDisplay();
+  display.setCursor(0, 0);
+  for (int i = 0; i < msg.len; i++) {
+    display.print(msg.chars[i]);
+  }
   display.display();
-  adjustCursorX(true, 10);
 }
 
 // true for decrement, false for increment
@@ -327,16 +365,44 @@ void adjustCursorX(bool mode, int offset)
 
 void cursorPulse()
 {
-  lastTime = millis() - lastTime;
-  timeElapsed += lastTime;
+  //lastTime = millis() - lastTime;
+  //timeElapsed += lastTime;
 
-  if (timeElapsed > 500 && currentMode != RECV)
+  if (millis() > 2000 + lastTime && currentMode != RECV)
+  {
+    Serial.println(lastTime);
     drawCursorBlock();
+    lastTime = millis();
+  }
+    
 }
 
 void drawCursorBlock()
 {
-  display.fillRect(display.getCursorX(), display.getCursorY(), 10, 5, SSD1306_WHITE);
+
+  if (cursor) {
+    display.fillRect(display.getCursorX(), display.getCursorY(), CHARWIDTH+1, 8, SSD1306_INVERSE);
+  } else {
+    display.fillRect(display.getCursorX(), display.getCursorY(), CHARWIDTH+1, 8, SSD1306_WHITE);
+  }
+  peekToPush();
+  cursor = !cursor;
+}
+
+void peekToPush() 
+{
+  if (toPush == '\0') return;
+
+  if (cursor) {
+    display.setTextColor(SSD1306_WHITE);
+    display.print(toPush);
+    adjustCursorX(false, CHARWIDTH);
+  } else {
+    display.setTextColor(SSD1306_INVERSE);
+    display.print(toPush);
+    display.setTextColor(SSD1306_WHITE);
+    adjustCursorX(false, CHARWIDTH);
+  }
   display.display();
 }
 
