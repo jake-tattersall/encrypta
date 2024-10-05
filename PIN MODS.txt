@@ -6,11 +6,11 @@ R2 = 18
 R1 = 20
 C3 = 36
 C2 = 39
-C1 = 41
+C1 = 27
 
 LCD PINS:
 
-D0 = 27
+D0 = 35
 D1 = 25
 RES = 24
 DC = 22
@@ -21,7 +21,7 @@ Butt Pins:
 YLW = 13
 BLU = 14
 GRN = 42
-RED = 40
+RED = 34
 
 LED Pins:
 
