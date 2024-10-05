@@ -58,7 +58,6 @@ Adafruit_Keypad keypad( makeKeymap(characterTable), rowPin, colPin, ROWS, COLS);
 // To get the 1-9 values, modulus by 12
 // We do special cases for * and # anyway
 
-
 #define RED 5
 #define GREEN 21
 #define BLUE 25
@@ -71,7 +70,6 @@ int greenLast = LOW;
 int blueLast = LOW;
 int yellowLast = LOW;
 
-
 uint8_t prevKey = 0;
 int timesPressed = 0;
 char toPush = '\0';
@@ -82,6 +80,9 @@ inputMode currentMode = RECV;
 // unsigned long timeElapsed = 0;
 unsigned long lastTime = 0;
 bool cursor = false;
+
+char *keyword;
+bool keyGiven = false;
 
 void setup()
 {
@@ -101,6 +102,10 @@ void setup()
   display.setTextSize(1);
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(0, 0);
+
+  display.print("Please Enter Key:");
+  display.setCursor(0, 8);
+  display.display();
 
   pinMode(RED, INPUT);
   pinMode(GREEN, INPUT);
@@ -160,9 +165,17 @@ void loop()
   int greenVal = digitalRead(GREEN);
   if (greenVal == HIGH && greenLast == LOW)
   {
-    // Send message
-    char keyword[] = "test";
-    sendMessage(msg, keyword);
+    if (keyGiven)
+    {
+      keyword = "test";
+      sendMessage(msg, keyword);
+    }
+    else
+    {
+      keyword = msg.chars;
+      memset(msg.chars, 0, sizeof(msg.chars));
+      keyGiven = true;
+    }
   }
   greenLast = greenVal;
 
@@ -181,6 +194,11 @@ void selectMode()
       // Prepare for recv
       break;
   }
+}
+
+void readKeyword()
+{
+
 }
 
 // Get input from read key press
@@ -403,7 +421,6 @@ void peekToPush()
   }
   display.display();
 }
-
 
 void sendMessage(Msg msg, char* keyword) {
   return;
