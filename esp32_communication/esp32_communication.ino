@@ -335,3 +335,8 @@ void drawCursorBlock()
   display.fillRect(display.getCursorX(), display.getCursorY(), 10, 5, SSD1306_WHITE);
   display.display();
 }
+
+
+void sendMessage(Msg msg, char* keyword) {
+  return;
+}

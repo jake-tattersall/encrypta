@@ -142,7 +142,7 @@ int prepare(char str[], int ptrs)
   return ptrs;
 }
 
-char[] encrypt(char str[], char keyT[5][5], int ps)
+char* encrypt(char str[], char keyT[5][5], int ps)
 {
   int i, a[4];
   
@@ -166,10 +166,10 @@ char[] encrypt(char str[], char keyT[5][5], int ps)
     }
 
   }
-  return str
+  return str;
 }
 
-char[] encryptByPlayfair(char str[], char key[])
+char* encryptByPlayfair(char str[], char key[])
 {
     char ps, ks, keyT[5][5];
     ks = strlen(key);
@@ -186,6 +186,6 @@ char[] encryptByPlayfair(char str[], char key[])
 
     encrypt(str, keyT, ps);
 
-  return str[];
+  return str;
 
 }

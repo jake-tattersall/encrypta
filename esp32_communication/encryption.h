@@ -12,6 +12,6 @@ int mod5(int a);
 
 int prepare(char str[], int ptrs);
 
-void encrypt(char str[], char keyT[5][5], int ps);
+char* encrypt(char str[], char keyT[5][5], int ps);
 
-void encryptByPlayfair(char str[], char key[]);
+char* encryptByPlayfair(char str[], char key[]);
