@@ -13,6 +13,8 @@ byte rowPin[] = {null, null, null, null};
 //               col1   2     3
 byte colPin[] = {null, null, null};
 
+int timesPressed = 0;
+
 enum inputMode { CHAR, DIGIT };
 
 void setup()
@@ -27,6 +29,10 @@ void loop()
   // put your main code here, to run repeatedly:
   Serial.println("Hello World!");
   tick()
+
+  keypadEvent e = keypad.read()
+  if (e != null)
+    readInput(e);
 }
 
 void keypadSetup(byte[] table)
@@ -34,10 +40,8 @@ void keypadSetup(byte[] table)
   keypad = new Adafruit_Keypad(characterTable, rowPin, colPin, 4, 3);
 }
 
-void readInput()
+void readInput(keypadEvent e)
 {
-  
-
   switch (inputMode)
     case "CHAR":
       readChar();
@@ -47,12 +51,14 @@ void readInput()
       break;
 }
 
-void readChar()
+void readChar(keypadEvent e)
 {
+  int key = e.KEY;
+
 
 }
 
-void readDigit()
+void readDigit(keypadEvent e)
 {
 
 }
@@ -61,10 +67,13 @@ void clearBuffer()
 {
   // if commit character button
   // keypad.clear();
+  // timesPressed = 0;
 
   // if backspace button
   // keypad.clear();
+  // timesPressed = 0;
 
   // if cancel button
   // keypad.clear();
+  // timesPressed = 0;
 }
