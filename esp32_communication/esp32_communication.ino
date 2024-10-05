@@ -239,5 +239,31 @@ void deleteFromDisplay()
   
   msg.len--;
 
-  // Update OLED
+  adjustCursorX(true, 10);
+  display.print(' ');
+  display.display();
+  adjustCursorX(true, 10);
+}
+
+// true for decrement, false for increment
+void adjustCursorX(bool mode, int offset)
+{
+  int temp = display.getCursorX();
+
+  if (true)
+    temp -= offset;
+  else
+    temp += offset;
+
+  display.setCursor(temp, display.getCursorY());
+}
+
+void cursorPulse()
+{
+
+}
+
+void drawCursorBlock()
+{
+  display.fillRect(display.getCursorX(), display.getCursorY(), 10, 5);
 }
