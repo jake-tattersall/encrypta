@@ -119,11 +119,31 @@ void loop()
     readInput(keypad.read());
 
   // if blue button
-  if (digitalRead(BLUE) == HIGH) {
-
+  if (digitalRead(BLUE) == HIGH)
+  {
+    if (currentMode == CHAR)
+      currentMode = DIGIT;
+    else
+      currentMode = CHAR;
   }
-  
-  // if yellow button
+
+  if (digitalRead(YELLOW) == HIGH)
+  {
+    if (currentMode == RECV)
+      currentMode = CHAR;
+    else
+      currentMode = RECV;
+  }
+
+  if (digitalRead(RED) == HIGH)
+  {
+    deleteFromDisplay();
+  }
+
+  if (digitalRead(GREEN) == HIGH)
+  {
+    // Send message
+  }
 }
 
 void selectMode()
