@@ -65,6 +65,9 @@ char toPush = '\0';
 enum inputMode { CHAR, DIGIT, RECV };
 inputMode currentMode = RECV;
 
+unsigned long timeElapsed = 0;
+unsigned long lastTime = 0;
+
 void setup()
 {
   // Runs once
@@ -98,6 +101,25 @@ void loop()
   //Serial.println(keypad.available());
   if (keypad.available())
     readInput(keypad.read());
+
+  // if blue button
+  
+  // if yellow button
+}
+
+void selectMode()
+{
+  switch (currentMode)
+  {
+    case CHAR:
+      timeElapsed = 0;
+      lastTime = milis();
+      break;
+    case RECV:
+      // Clear board
+      // Prepare for recv
+      break;
+  }
 }
 
 // Get input from read key press
@@ -260,7 +282,11 @@ void adjustCursorX(bool mode, int offset)
 
 void cursorPulse()
 {
+  lastTime = milis() - lastTime;
+  timeElapsed += lastTime;
 
+  if (timeElapsed > 500 && currentMode != RECV)
+    drawCursorBlock();
 }
 
 void drawCursorBlock()
