@@ -152,6 +152,7 @@ void loop()
   int redVal = digitalRead(RED);
   if (redVal == HIGH && redLast == LOW)
   {
+    Serial.println("R");
     deleteFromDisplay();
   }
   redLast = redVal;
@@ -239,7 +240,7 @@ void readChar(keypadEvent e)
   Serial.print("ToPush = ");
   Serial.println(toPush);
 
-  peekToPush();
+  drawCursorBlock();
 }
 
 // Determines which number was pressed
@@ -259,7 +260,7 @@ void readDigit(keypadEvent e)
 
   toPush = 48 + key % 12;
 
-  peekToPush();
+  drawCursorBlock();
 }
 
 // Checks if the button press was the * or #, then perform that action
@@ -366,8 +367,8 @@ void cursorPulse()
 
   if (millis() > 2000 + lastTime && currentMode != RECV)
   {
-    Serial.println(lastTime);
     drawCursorBlock();
+    cursor = !cursor;
     lastTime = millis();
   }
     
@@ -382,7 +383,8 @@ void drawCursorBlock()
     display.fillRect(display.getCursorX(), display.getCursorY(), CHARWIDTH+1, 8, SSD1306_WHITE);
   }
   peekToPush();
-  cursor = !cursor;
+  if (toPush == '\0') 
+    display.display();
 }
 
 void peekToPush() 
