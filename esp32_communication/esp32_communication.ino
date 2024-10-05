@@ -58,6 +58,15 @@ Adafruit_Keypad keypad( makeKeymap(characterTable), rowPin, colPin, ROWS, COLS);
 // To get the 1-9 values, modulus by 12
 // We do special cases for * and # anyway
 
+
+#define RED 5
+#define GREEN 21
+#define BLUE 25
+#define YELLOW 33
+#define YELLOW_LED 32
+#define BLUE_LED 26
+
+
 uint8_t prevKey = 0;
 int timesPressed = 0;
 char toPush = '\0';
@@ -87,6 +96,13 @@ void setup()
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(0, 0);
 
+  pinMode(RED, INPUT);
+  pinMode(GREEN, INPUT);
+  pinMode(BLUE, INPUT);
+  pinMode(YELLOW, INPUT);
+  pinMode(YELLOW_LED, INPUT);
+  pinMode(BLUE_LED, INPUT);
+
   msg.len = 0;
 
   // PLEASE CHANGE LATER, ONLY FOR TESTING
@@ -103,6 +119,9 @@ void loop()
     readInput(keypad.read());
 
   // if blue button
+  if (digitalRead(BLUE) == HIGH) {
+
+  }
   
   // if yellow button
 }
