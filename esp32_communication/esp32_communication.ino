@@ -27,7 +27,6 @@
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT,
   OLED_MOSI, OLED_CLK, OLED_DC, OLED_RESET, OLED_CS);
 
-
 typedef struct Msg {
   char chars[MAXCHARS];
   int len;
@@ -45,10 +44,7 @@ char characterTable[ROWS][COLS] = {
                                   {'7', '8', '9'}, 
                                   {'*', '0', '#'}};
 
-
-//               row1   2     3     4
 byte rowPin[] = {33, 25, 26, 27};
-//               col1   2     3
 byte colPin[] = {21, 22, 32};
 
 Adafruit_Keypad keypad( makeKeymap(characterTable), rowPin, colPin, ROWS, COLS);
@@ -59,10 +55,8 @@ Adafruit_Keypad keypad( makeKeymap(characterTable), rowPin, colPin, ROWS, COLS);
 // 42 48 35
 
 // This is because the table had to be converted to char (it just worked this way) 
-
 // To get the 1-9 values, modulus by 12
 // We do special cases for * and # anyway
-
 
 uint8_t prevKey = 0;
 int timesPressed = 0;
@@ -76,7 +70,6 @@ void setup()
   // Runs once
   Serial.begin(115200);
   keypad.begin();
-
 
   if(!display.begin(SSD1306_SWITCHCAPVCC)) {
     Serial.println(F("SSD1306 allocation failed"));
@@ -99,7 +92,6 @@ void setup()
 
 void loop()
 {
-
   // Looped code
   keypad.tick();
 
@@ -164,7 +156,6 @@ void readChar(keypadEvent e)
 
   Serial.print("ToPush = ");
   Serial.println(toPush);
-  
 }
 
 // Determines which number was pressed
@@ -203,7 +194,6 @@ bool checkSymbols(int key)
   return false;
 }
 
-
 void space()
 {
   toPush = ' ';
@@ -231,8 +221,6 @@ void pushToDisplay()
   msg.chars[msg.len++] = toPush;
   toPush = '\0';
 
-  
-
   for (int i = 0; i < msg.len; i++) {
     Serial.print(msg.chars[i]);
   }
@@ -253,9 +241,3 @@ void deleteFromDisplay()
 
   // Update OLED
 }
-
-
-
-
-
-
