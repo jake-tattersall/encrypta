@@ -113,7 +113,7 @@ void loop()
   // Looped code
   keypad.tick();
 
-  //Serial.println(keypad.available());
+  //Serial.println("hello");
   if (keypad.available())
     readInput(keypad.read());
 
@@ -142,7 +142,10 @@ void loop()
   if (digitalRead(GREEN) == HIGH)
   {
     // Send message
+    Serial.println("green pressed");
+    msg.chars[msg.len] = '\0';
     char keyword[] = "test";
+    
     sendMessage(msg, keyword);
 
 
@@ -337,6 +340,16 @@ void drawCursorBlock()
 }
 
 
-void sendMessage(Msg msg, char* keyword) {
+void sendMessage(Msg msg, char keyword[]) {
+  Serial.print("encrypting word: ");
+  Serial.println(msg.chars);
+
+
+  Serial.print("keyword: ");
+  Serial.println(keyword);
+  char* encryptedMsg= encryptByPlayfair(msg.chars, keyword);
+
+  Serial.print("Encrypted message: ");
+  Serial.println(encryptedMsg);
   return;
 }

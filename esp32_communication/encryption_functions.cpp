@@ -21,16 +21,15 @@ int removeSpaces(char* plain, int ps)
   int i, count = 0;
   for(i = 0; i < ps; i++){
 
+    
     if(plain[i] != ' ')
     {
-      if(plain [i] != ' ')
-      {
-        plain[count++] = plain[i];
-      }
-      plain[count] = '\0';
-      return count;
-
+      plain[count++] = plain[i];
     }
+    plain[count] = '\0';
+    return count;
+
+    
 
   }
 }
@@ -173,13 +172,20 @@ char* encryptByPlayfair(char str[], char key[])
 {
     char ps, ks, keyT[5][5];
     ks = strlen(key);
-    ks = removeSpaces(key,ks);
+    //ks = removeSpaces(key,ks);
     toLowerCase(key,ks);
+
+
+    //Serial.println(str);
+    Serial.println(key);
+
+
 
     ps = strlen(str);
     toLowerCase(str, ps);
-    ps = removeSpaces(str, ps);
+    //ps = removeSpaces(str, ps);
     
+    Serial.println(str);
     ps = prepare(str, ps);
 
     generateKeyTable(key, ks ,keyT);
