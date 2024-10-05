@@ -19,11 +19,11 @@
 #define STAR 42
 #define POUND 35
 
-#define OLED_MOSI   4
+#define OLED_MOSI   16
 #define OLED_CLK   18
-#define OLED_DC    17
-#define OLED_CS    5
-#define OLED_RESET 16
+#define OLED_DC    2
+#define OLED_CS    15
+#define OLED_RESET 4
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT,
   OLED_MOSI, OLED_CLK, OLED_DC, OLED_RESET, OLED_CS);
 
@@ -44,8 +44,8 @@ char characterTable[ROWS][COLS] = {
                                   {'7', '8', '9'}, 
                                   {'*', '0', '#'}};
 
-byte rowPin[] = {33, 25, 26, 27};
-byte colPin[] = {21, 22, 32};
+byte rowPin[] = {13, 12, 14, 27};
+byte colPin[] = {17, 22, 23};
 
 Adafruit_Keypad keypad( makeKeymap(characterTable), rowPin, colPin, ROWS, COLS);
 // The keypad buttons result in the following e.bit.KEY outputs:
@@ -104,7 +104,7 @@ void loop()
 // Based on the current read mode
 void readInput(keypadEvent e)
 {
-  Serial.println(e.bit.KEY);
+  //Serial.println(e.bit.KEY);
   // Button is considered triggered onPress and onRelease. This ignores release
   if (keypad.justReleased(e.bit.KEY)) return;
   
