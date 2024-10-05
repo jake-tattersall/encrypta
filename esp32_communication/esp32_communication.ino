@@ -1,7 +1,6 @@
 #include <Adafruit_SSD1306.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_Keypad.h>
-#include <SPI.h>
 
 #include <esp_now.h>
 #include <Wire.h>
@@ -152,7 +151,7 @@ void selectMode()
   {
     case CHAR:
       timeElapsed = 0;
-      lastTime = milis();
+      lastTime = millis();
       break;
     case RECV:
       // Clear board
@@ -281,7 +280,6 @@ void pushToDisplay()
 
   msg.chars[msg.len++] = toPush;
   toPush = '\0';
-
   for (int i = 0; i < msg.len; i++) {
     Serial.print(msg.chars[i]);
   }
@@ -321,7 +319,7 @@ void adjustCursorX(bool mode, int offset)
 
 void cursorPulse()
 {
-  lastTime = milis() - lastTime;
+  lastTime = millis() - lastTime;
   timeElapsed += lastTime;
 
   if (timeElapsed > 500 && currentMode != RECV)
@@ -330,5 +328,6 @@ void cursorPulse()
 
 void drawCursorBlock()
 {
-  display.fillRect(display.getCursorX(), display.getCursorY(), 10, 5);
+  display.fillRect(display.getCursorX(), display.getCursorY(), 10, 5, SSD1306_WHITE);
+  display.display();
 }
