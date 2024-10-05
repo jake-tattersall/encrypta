@@ -10,7 +10,7 @@
 #define SCREEN_HEIGHT 64
 
 typedef struct Msg {
-  char chars[256];
+  char chars[MAXCHARS];
   int len;
 } Msg;
 
@@ -75,6 +75,7 @@ void readInput(keypadEvent e)
 }
 
 // Determines which char was pressed 
+// Sets toPush to the char
 void readChar(keypadEvent e)
 {
   int key = e.bit.KEY;
@@ -90,9 +91,12 @@ void readChar(keypadEvent e)
 
   int indx = ((key - 2) * 3) + mod;
   toPush = alphabet[indx];
+  Serial.print("ToPush = ");
+  Serial.println(toPush);
 }
 
 // Determines which number was pressed
+// Sets toPush to the digit
 void readDigit(keypadEvent e)
 {
   int key = e.bit.KEY;
@@ -102,6 +106,11 @@ void readDigit(keypadEvent e)
   
   if (key == 11)
     key = 0;
+
+  // String intAsString = ""+key;
+  // toPush = intAsString.charAt(0);
+
+  toPush = 30 + key;
 }
 
 // Checks if the button press was the * or #, then perform that action
@@ -132,6 +141,7 @@ void space()
 void confirm()
 {
   clearBuffer();
+  pushToDisplay();
 }
 
 void clearBuffer()

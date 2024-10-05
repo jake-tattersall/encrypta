@@ -1,0 +1,30 @@
+KEYPAD PINS:
+
+R4 = 16
+R3 = 17
+R2 = 18
+R1 = 20
+C3 = 36
+C2 = 39
+C1 = 41
+
+LCD PINS:
+
+D0 = 27
+D1 = 25
+RES = 24
+DC = 22
+CS = 25
+
+Butt Pins:
+
+YLW = 13
+BLU = 14
+GRN = 42
+RED = 40
+
+LED Pins:
+
+WHT = 12
+
+BLU = 15
