@@ -258,10 +258,10 @@ char* decryptPlayfair(char str[], char key[])
   char ps, ks, keyT[5][5];
 
   ks = strlen(key);
-  // toLowerCase(key, ks);
+  toLowerCase(key, ks);
 
   ps = strlen(str);
-  // toLowerCase(str, ps);
+  toLowerCase(str, ps);
 
   generateKeyTable(key, strlen(key), keyT);
 
@@ -290,6 +290,7 @@ char* decryptPlayfair(char str[], char key[])
 
     decStr[numPlaced++] = str[i];
   }
+  decStr[numPlaced++] = '\0';
 
 
 

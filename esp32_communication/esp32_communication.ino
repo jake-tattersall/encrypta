@@ -3,7 +3,7 @@
 #include <Adafruit_Keypad.h>
 
 #include <esp_now.h>
-#include <Wire.h>
+//#include <Wire.h>
 #include <WiFi.h>
 #include <esp_wifi.h>
 
@@ -31,7 +31,8 @@
 
 esp_now_peer_info_t peerInfo;
 
-uint8_t broadcastAddress[] = {0xac, 0x15, 0x18, 0xd5, 0x73, 0x5c}; // {0xac, 0x15, 0x18, 0xd5, 0x73, 0x5c};
+uint8_t broadcastAddress[] = {0x88, 0x13, 0xbf, 0x63, 0x9a, 0xe0}; 
+//uint8_t broadcastAddress[] = {0xac, 0x15, 0x18, 0xd5, 0x73, 0x5c};
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT,
   OLED_MOSI, OLED_CLK, OLED_DC, OLED_RESET, OLED_CS);
@@ -77,14 +78,14 @@ Adafruit_Keypad keypad( makeKeymap(characterTable), rowPin, colPin, ROWS, COLS);
 int redLast = LOW;
 int greenLast = LOW;
 int blueLast = HIGH;
-int yellowLast = LOW;
+int yellowLast = HIGH;
 
 uint8_t prevKey = 0;
 int timesPressed = 0;
 char toPush = '\0';
 
 enum inputMode { CHAR, DIGIT, RECV };
-inputMode currentMode = RECV;
+inputMode currentMode = CHAR;
 
 // unsigned long timeElapsed = 0;
 unsigned long lastTime = 0;
@@ -105,16 +106,34 @@ void OnDataSent(const uint8_t* mac_addr, esp_now_send_status_t status){
   Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Success" : "Fail");
 }
 
-char* recievedString = (char *)malloc(MAXCHARS);
 void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len){
   Serial.println("Data Received");
   if (currentMode != RECV) return;
   memcpy(&incoming_messages, incomingData, sizeof(incoming_messages));
+  Serial.print(len);
   int msg_len = strlen(incoming_messages.msg);
+
+  // REMOVE LATER
+  display.clearDisplay();
+  display.setCursor(0, 0);
   for (int i = 0; i < msg_len; i++) {
     Serial.print(incoming_messages.msg[i]);
+    display.print(incoming_messages.msg[i]);
   }
-  Serial.println();
+  display.setCursor(0, 8);
+
+  char *temp = (char*) malloc(MAXCHARS * sizeof(char));
+  strcpy(temp, decryptPlayfair(incoming_messages.msg, keyword));
+  strcpy(incoming_messages.msg, temp);
+  
+  Serial.println(msg_len);
+  //display.clearDisplay(); UNCOMMENT LATER
+  //display.setCursor(0, 0); UNCOMMENT LATER
+  for (int i = 0; i < msg_len; i++) {
+    Serial.print(incoming_messages.msg[i]);
+    display.print(incoming_messages.msg[i]);
+  }
+  display.display();
 }
 
 
@@ -126,7 +145,7 @@ void setup()
   Serial.begin(115200);
   keypad.begin();
 
-  if(!display.begin(SSD1306_SWITCHCAPVCC)) {
+  if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3D)) {
     Serial.println(F("SSD1306 allocation failed"));
     for(;;); // Don't proceed, loop forever
   }
@@ -151,14 +170,14 @@ void setup()
   esp_now_register_send_cb(OnDataSent);
 
   display.display();
-  //delay(2000);
+  delay(2000);
 
   display.clearDisplay();
   display.setTextSize(1);
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(0, 0);
 
-  display.print("Please Enter Key:");
+  display.println("Please Enter Key:");
   display.setCursor(0, 8);
   display.display();
 
@@ -170,11 +189,10 @@ void setup()
   pinMode(BLUE_LED, OUTPUT);
 
   digitalWrite(BLUE_LED, HIGH);
+  digitalWrite(YELLOW_LED, HIGH);
 
   msg.len = 0;
 
-  // PLEASE CHANGE LATER, ONLY FOR TESTING
-  currentMode = CHAR;
 }
 
 void loop()
@@ -211,12 +229,18 @@ void loop()
     if (currentMode == RECV) {
       currentMode = CHAR;
       digitalWrite(YELLOW_LED, HIGH);
+      if (!keyGiven) {
+        display.println("Please Enter Key:");
+        display.setCursor(0, 8);
+        display.display();
+      }
     }
     else {
       currentMode = RECV;
       msg.len = 0;
       digitalWrite(YELLOW_LED, LOW);
     }
+    display.clearDisplay();
   }
   yellowLast = yellowVal;
 
@@ -535,7 +559,7 @@ void sendMessage(Msg msg, char keyword[]) {
   Serial.println(keyword);
 
   char *token = strtok(msg.chars, " ");
-  char encryptedText[MAXCHARS] = "";
+  char *encryptedText = (char*) malloc(MAXCHARS * sizeof(char));
   int flag = 0;
   //works
   while(token != NULL){
@@ -551,7 +575,7 @@ void sendMessage(Msg msg, char keyword[]) {
       Serial.println(encryptedWord);
       strcat(encryptedText, encryptedWord);
       token = strtok(NULL, " ");
-      
+      free(currentWord);
       flag = 1; 
     }else{
       //Serial.print("Current Word: ");
@@ -571,6 +595,7 @@ void sendMessage(Msg msg, char keyword[]) {
       Serial.println(strlen(currentWord));
 
       token = strtok(NULL, " ");
+      free(encryptedText);
       
     }
     
