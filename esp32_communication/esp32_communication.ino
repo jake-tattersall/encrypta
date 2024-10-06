@@ -108,6 +108,7 @@ void OnDataSent(const uint8_t* mac_addr, esp_now_send_status_t status){
 char* recievedString = (char *)malloc(MAXCHARS);
 void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len){
   Serial.println("Data Received");
+  if (currentMode != RECV) return;
   memcpy(&incoming_messages, incomingData, sizeof(incoming_messages));
   int msg_len = strlen(incoming_messages.msg);
   for (int i = 0; i < msg_len; i++) {
@@ -244,7 +245,9 @@ void loop()
     Serial.println("G");
     if (keyGiven)
     {
-      sendMessage(msg, keyword);
+      // If msg, send it
+      if (msg.len > 0)
+        sendMessage(msg, keyword);
     }
     else
     {
@@ -253,10 +256,11 @@ void loop()
       //memset(msg.chars, 0, sizeof(msg.chars));
       keyGiven = true;
     }
+    
     display.clearDisplay();
     display.setCursor(0, 0);
     msg.len = 0;
-
+    delay(100);
   }
   greenLast = greenVal;
 
@@ -543,7 +547,7 @@ void sendMessage(Msg msg, char keyword[]) {
   struct_message to_send;
   strcpy(to_send.msg, encryptedMsg);
 
-  esp_err_t result = esp_now_send(broadcastAddress, (uint8_t*) to_send, strlen(encryptedMsg) + 1);
+  esp_err_t result = esp_now_send(broadcastAddress, (uint8_t*) &to_send, strlen(encryptedMsg));
 }  
 /*
 void readMacAddress(){
