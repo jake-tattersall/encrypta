@@ -190,14 +190,13 @@ void loop()
   int greenVal = digitalRead(GREEN);
   if (greenVal == HIGH && greenLast == LOW)
   {
-<<<<<<< HEAD
     // Send message
     Serial.println("green pressed");
     msg.chars[msg.len] = '\0';
     char keyword[] = "test";
     
     sendMessage(msg, keyword);
-=======
+
     Serial.println("G");
     if (keyGiven)
     {
@@ -213,7 +212,7 @@ void loop()
     display.clearDisplay();
     display.setCursor(0, 0);
     msg.len = 0;
->>>>>>> 84feca8b435ef01b91358d27c15257115639d24b
+
   }
   greenLast = greenVal;
 
@@ -478,7 +477,7 @@ void peekToPush()
   display.display();
 }
 
-<<<<<<< HEAD
+
 
 void sendMessage(Msg msg, char keyword[]) {
   Serial.print("encrypting word: ");
@@ -497,11 +496,6 @@ void sendMessage(Msg msg, char keyword[]) {
   Serial.print("Decrypted message: ");
   Serial.println(decryptedMsg);
   
-=======
-void sendMessage(Msg msg, char* keyword) {
->>>>>>> 84feca8b435ef01b91358d27c15257115639d24b
-  return;
-}
 
 void readMacAddress(){
   uint8_t baseMac[6];
