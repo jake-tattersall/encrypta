@@ -111,8 +111,10 @@ void setup()
   pinMode(GREEN, INPUT);
   pinMode(BLUE, INPUT);
   pinMode(YELLOW, INPUT);
-  pinMode(YELLOW_LED, INPUT);
-  pinMode(BLUE_LED, INPUT);
+  pinMode(YELLOW_LED, OUTPUT);
+  pinMode(BLUE_LED, OUTPUT);
+
+  //digitalWrite(BLUE_LED, HIGH);
 
   msg.len = 0;
 
@@ -135,21 +137,30 @@ void loop()
   int blueVal = digitalRead(BLUE);
   if (blueVal == HIGH && blueLast == LOW)
   {
-    if (currentMode == CHAR)
+    Serial.println("B");
+    if (currentMode == CHAR) {
       currentMode = DIGIT;
-    else
+      digitalWrite(BLUE_LED, LOW);
+    }
+    else {
       currentMode = CHAR;
+      digitalWrite(BLUE_LED, HIGH);
+    }    
   }
   blueLast = blueVal;
 
   int yellowVal = digitalRead(YELLOW);
   if (yellowVal == HIGH && yellowLast == LOW)
   {
-    if (currentMode == RECV)
+    Serial.println("Y");
+    if (currentMode == RECV) {
       currentMode = CHAR;
+      digitalWrite(YELLOW_LED, HIGH);
+    }
     else {
       currentMode = RECV;
       msg.len = 0;
+      digitalWrite(YELLOW_LED, LOW);
     }
   }
   yellowLast = yellowVal;
@@ -165,6 +176,7 @@ void loop()
   int greenVal = digitalRead(GREEN);
   if (greenVal == HIGH && greenLast == LOW)
   {
+    Serial.println("G");
     if (keyGiven)
     {
       keyword = "test";
@@ -176,6 +188,9 @@ void loop()
       memset(msg.chars, 0, sizeof(msg.chars));
       keyGiven = true;
     }
+    display.clearDisplay();
+    display.setCursor(0, 0);
+    msg.len = 0;
   }
   greenLast = greenVal;
 
@@ -323,20 +338,38 @@ void pushToDisplay()
   if (toPush == '\0' || msg.len == MAXCHARS)
     return; 
 
-  msg.chars[msg.len++] = toPush;
-  toPush = '\0';
-  for (int i = 0; i < msg.len; i++) {
-    Serial.print(msg.chars[i]);
+  if (!keyGiven) {
+    display.clearDisplay();
+    display.setCursor(0, 0);
+    display.println("Please Enter Key:");
+
+    msg.chars[msg.len++] = toPush;
+    toPush = '\0';
+
+    display.setCursor(0, 8);
+    for (int i = 0; i < msg.len; i++) {
+      display.print(msg.chars[i]);
+    }
+    display.display();
+
+  } else {
+    msg.chars[msg.len++] = toPush;
+    toPush = '\0';
+    for (int i = 0; i < msg.len; i++) {
+      Serial.print(msg.chars[i]);
+    }
+    Serial.println();
+
+    // display.fillRect(display.getCursorX(), display.getCursorY(), 10, 10, SSD1306_INVERSE);
+
+    // //display.clearDisplay();
+    // display.print(msg.chars[msg.len-1]);
+    // display.display();
+
+    printMessage();
   }
-  Serial.println();
 
-  // display.fillRect(display.getCursorX(), display.getCursorY(), 10, 10, SSD1306_INVERSE);
-
-  // //display.clearDisplay();
-  // display.print(msg.chars[msg.len-1]);
-  // display.display();
-
-  printMessage();
+  
 }
 
 // Delete the last char from the queue and screen
@@ -383,7 +416,7 @@ void cursorPulse()
   //lastTime = millis() - lastTime;
   //timeElapsed += lastTime;
 
-  if (millis() > 2000 + lastTime && currentMode != RECV)
+  if (millis() > 500 + lastTime && currentMode != RECV)
   {
     drawCursorBlock();
     cursor = !cursor;
