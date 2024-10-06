@@ -7,7 +7,7 @@
 #include <WiFi.h>
 #include <esp_wifi.h>
 
-
+#include <string.h>
 #include <encryption.h>
 
 #define KEYPAD_PID1824
@@ -27,6 +27,12 @@
 #define OLED_DC    2
 #define OLED_CS    15
 #define OLED_RESET 4
+
+
+esp_now_peer_info_t peerInfo;
+
+uint8_t broadcastAddress[] = {0x88, 0x13, 0xbf, 0x63, 0x9a, 0xe0};
+
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT,
   OLED_MOSI, OLED_CLK, OLED_DC, OLED_RESET, OLED_CS);
 
@@ -70,7 +76,7 @@ Adafruit_Keypad keypad( makeKeymap(characterTable), rowPin, colPin, ROWS, COLS);
 
 int redLast = LOW;
 int greenLast = LOW;
-int blueLast = LOW;
+int blueLast = HIGH;
 int yellowLast = LOW;
 
 uint8_t prevKey = 0;
@@ -86,6 +92,20 @@ bool cursor = false;
 
 char *keyword;
 bool keyGiven = false;
+/*Establishing ESP-NOW*/
+
+void OnDataSent(const uint8_t* mac_addr, esp_now_send_status_t status){
+  Serial.print("Last Packet Sent Status: ");
+  Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Success" : "Fail");
+}
+
+char* recievedString = (char *)malloc(MAXCHARS);
+void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len){
+  memcpy(recievedString, incomingData, strlen(recievedString));
+}
+
+
+
 
 void setup()
 {
@@ -97,14 +117,24 @@ void setup()
     Serial.println(F("SSD1306 allocation failed"));
     for(;;); // Don't proceed, loop forever
   }
-  /*
+  
   WiFi.mode(WIFI_STA);
-  WiFi.STA.begin();
+  if(esp_now_init() != ESP_OK){
+    Serial.println("Error initializing ESP-NOW");
+    return;
+  }
+  memcpy(peerInfo.peer_addr, broadcastAddress, 6);
+  peerInfo.channel = 0;
+  peerInfo.encrypt = false;
+
+  if(esp_now_add_peer(&peerInfo) != ESP_OK){
+    Serial.println("Can't add peer");
+    return;
+  }
   
-  Serial.print("MAC Address: ");
-  readMacAddress();
-  */
-  
+  //Listen for when data is recieved
+  esp_now_register_recv_cb(esp_now_recv_cb_t(OnDataRecv));
+
   display.display();
   //delay(2000);
 
@@ -124,7 +154,7 @@ void setup()
   pinMode(YELLOW_LED, OUTPUT);
   pinMode(BLUE_LED, OUTPUT);
 
-  //digitalWrite(BLUE_LED, HIGH);
+  digitalWrite(BLUE_LED, HIGH);
 
   msg.len = 0;
 
@@ -191,16 +221,16 @@ void loop()
   if (greenVal == HIGH && greenLast == LOW)
   {
     // Send message
-    Serial.println("green pressed");
+    //Serial.println("green pressed");
     msg.chars[msg.len] = '\0';
-    char keyword[] = "test";
+    //char keyword[] = "test";
     
-    sendMessage(msg, keyword);
+    //sendMessage(msg, keyword);
 
     Serial.println("G");
     if (keyGiven)
     {
-      keyword = "test";
+      char keyword[] = "test";
       sendMessage(msg, keyword);
     }
     else
@@ -495,8 +525,10 @@ void sendMessage(Msg msg, char keyword[]) {
   
   Serial.print("Decrypted message: ");
   Serial.println(decryptedMsg);
-  
 
+  esp_err_t result = esp_now_send(broadcastAddress, (uint8_t*)encryptedMsg, sizeof(encryptedMsg));
+}  
+/*
 void readMacAddress(){
   uint8_t baseMac[6];
   esp_err_t ret = esp_wifi_get_mac(WIFI_IF_STA, baseMac);
@@ -508,7 +540,7 @@ void readMacAddress(){
   }
 
 }
-
+*/
 
 
 
