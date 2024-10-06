@@ -31,7 +31,7 @@
 
 esp_now_peer_info_t peerInfo;
 
-uint8_t broadcastAddress[] = {0x88, 0x13, 0xbf, 0x63, 0x9a, 0xe0}; // {0xac, 0x15, 0x18, 0xd5, 0x73, 0x5c};
+uint8_t broadcastAddress[] = {0xac, 0x15, 0x18, 0xd5, 0x73, 0x5c}; // {0xac, 0x15, 0x18, 0xd5, 0x73, 0x5c};
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT,
   OLED_MOSI, OLED_CLK, OLED_DC, OLED_RESET, OLED_CS);
@@ -473,7 +473,7 @@ void adjustCursorX(bool mode, int offset)
 {
   int temp = display.getCursorX();
 
-  if (true)
+  if (mode)
     temp -= offset;
   else
     temp += offset;
@@ -515,12 +515,12 @@ void peekToPush()
   if (cursor) {
     display.setTextColor(SSD1306_WHITE);
     display.print(toPush);
-    adjustCursorX(false, CHARWIDTH);
+    adjustCursorX(true, CHARWIDTH);
   } else {
     display.setTextColor(SSD1306_INVERSE);
     display.print(toPush);
     display.setTextColor(SSD1306_WHITE);
-    adjustCursorX(false, CHARWIDTH);
+    adjustCursorX(true, CHARWIDTH);
   }
   display.display();
 }
@@ -531,23 +531,106 @@ void sendMessage(Msg msg, char keyword[]) {
   Serial.print("encrypting word: ");
   Serial.println(msg.chars);
 
-
   Serial.print("keyword: ");
   Serial.println(keyword);
-  char* encryptedMsg = encryptByPlayfair(msg.chars, keyword);
 
-  Serial.print("Encrypted message: ");
-  Serial.println(encryptedMsg);
+  char *token = strtok(msg.chars, " ");
+  char encryptedText[MAXCHARS] = "";
+  int flag = 0;
+  //works
+  while(token != NULL){
+    
+    if(flag == 0){
+      //Serial.print("Current Word: ");
+      char* currentWord = (char*)malloc(MAXCHARS);
+      strcpy(currentWord, token);
+      Serial.println(currentWord);
 
-  char* decryptedMsg = decryptPlayfair(encryptedMsg, keyword);
+      char* encryptedWord = encryptByPlayfair(currentWord, keyword);
+      //Serial.print("Encrypted Word: ");
+      Serial.println(encryptedWord);
+      strcat(encryptedText, encryptedWord);
+      token = strtok(NULL, " ");
+      
+      flag = 1; 
+    }else{
+      //Serial.print("Current Word: ");
+      strcat(encryptedText, " ");
+      
+      char* currentWord = (char*)malloc(MAXCHARS);
+      strcpy(currentWord, token);
+      Serial.println(currentWord);
+
+      char* encryptedWord = encryptByPlayfair(currentWord, keyword);
+      strcat(encryptedText, encryptedWord);
+
+      Serial.print("Encrypted Word: ");
+      Serial.println(encryptedWord);
+
+      Serial.print("Strlen");
+      Serial.println(strlen(currentWord));
+
+      token = strtok(NULL, " ");
+      
+    }
+    
+    //Serial.println(encryptedText);
+    
+
+  }
+  encryptedText[strlen(encryptedText)] = '\0';
   
-  Serial.print("Decrypted message: ");
-  Serial.println(decryptedMsg);
+  Serial.print("Encrypted message: ");
+  Serial.println(encryptedText);
+  
+  char* encryptToken = strtok(encryptedText, " ");
+  char decryptedText[MAXCHARS] = "";
+  flag = 0;
+  
+  while(encryptToken != NULL){
+    
+    if(flag == 0){
+      Serial.print("Current Word: ");
+      char* currentWord = (char*)malloc(MAXCHARS);
+      strcpy(currentWord, encryptToken);
+      Serial.println(currentWord);
 
+      char* decryptedWord = decryptPlayfair(currentWord, keyword);
+      Serial.print("Decrypted Word: ");
+      Serial.println(decryptedWord);
+
+      strcat(decryptedText, decryptedWord);
+      encryptToken = strtok(NULL, " ");
+      flag = 1; 
+      
+    }else{
+      Serial.print("Current Word: ");
+      strcat(decryptedText, " ");
+      char* currentWord = (char*)malloc(MAXCHARS);
+      strcpy(currentWord, encryptToken);
+
+      Serial.println(currentWord);
+
+      char* decryptedWord = decryptPlayfair(currentWord, keyword);
+      strcat(decryptedText, decryptedWord);
+      encryptToken = strtok(NULL, " ");
+    
+    }
+
+  
+    
+
+  }
+  
+  Serial.print("Decrypted Text: ");
+  decryptedText[strlen(decryptedText)] = '\0';
+  Serial.println(decryptedText);
+  
   struct_message to_send;
-  strcpy(to_send.msg, encryptedMsg);
+  strcpy(to_send.msg, encryptedText);
 
-  esp_err_t result = esp_now_send(broadcastAddress, (uint8_t*) &to_send, strlen(encryptedMsg));
+  esp_err_t result = esp_now_send(broadcastAddress, (uint8_t*) &to_send, strlen(encryptedText));
+  
 }  
 /*
 void readMacAddress(){

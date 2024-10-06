@@ -10,7 +10,7 @@ void search(char keyT[5][5], char a, char b, int arr[]);
 
 int mod5(int a);
 
-int prepare(char str[], int ptrs);
+void prepare(char str[], int ptrs);
 
 char* encrypt(char str[], char keyT[5][5], int ps);
 

@@ -125,7 +125,7 @@ void prepare(char str[], int ptrs)
 
   char A, B;
 
-  printf("%d\n", strlen(str));
+
 
   for (int i = 0; i < strlen(str); i = i + 2)
   {
@@ -164,7 +164,7 @@ void prepare(char str[], int ptrs)
         i--;
   }
 
-  printf("%d\n", strlen(newStr));
+  
 }
 
 char* encrypt(char str[], char keyT[5][5], int ps)
@@ -205,41 +205,14 @@ char* encryptByPlayfair(char str[], char key[])
   ps = strlen(str);
   toLowerCase(str, ps);
 
-  for (int i = 0; i < ks; i++)
-    printf("%c", key[i]);
-
-  printf("\n");
-
-  for (int i = 0; i < ps; i++)
-    printf("%c", str[i]);
-
-  printf("\n");
-
   // Serial.println(str);
   prepare(str, ps);
 
-  for (int i = 0; i < strlen(newStr); i++)
-    printf("%c", newStr[i]);
-
-  printf("\n");
 
   generateKeyTable(key, ks, keyT);
 
-  for (int i = 0; i < 5; i++)
-  {
-    for (int j = 0; j < 5; j++)
-    {
-      printf("%c ", keyT[i][j]);
-    }
-    printf("\n");
-  }
-
   encrypt(newStr, keyT, strlen(newStr));
 
-  for (int i = 0; i < strlen(newStr); i++)
-    printf("%c", newStr[i]);
-
-  printf("\n");
 
   return newStr;
 }
@@ -292,28 +265,11 @@ char* decryptPlayfair(char str[], char key[])
 
   generateKeyTable(key, strlen(key), keyT);
 
-  for (int i = 0; i < 5; i++)
-  {
-    for (int j = 0; j < 5; j++)
-    {
-      printf("%c ", keyT[i][j]);
-    }
-    printf("\n");
-  }
   
-  for (int i = 0; i < strlen(str); i++)
-    printf("%c", str[i]);
-
-  printf("\n");
+  
 
   decrypt(str, keyT, strlen(str));
 
-  for (int i = 0; i < strlen(str); i++)
-    printf("%c", str[i]);
-
-  printf("\n");
-  
-  printf("%d\n", strlen(str));
 
   int numPlaced = 0;
 
@@ -335,10 +291,7 @@ char* decryptPlayfair(char str[], char key[])
     decStr[numPlaced++] = str[i];
   }
 
-  for (int i = 0; i < strlen(decStr); i++)
-    printf("%c", decStr[i]);
 
-  printf("\n");
 
-  return str;
+  return decStr;
 }
