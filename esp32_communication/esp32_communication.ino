@@ -4,6 +4,9 @@
 
 #include <esp_now.h>
 #include <Wire.h>
+#include <WiFi.h>
+#include <esp_wifi.h>
+
 
 #include <encryption.h>
 
@@ -93,7 +96,14 @@ void setup()
     Serial.println(F("SSD1306 allocation failed"));
     for(;;); // Don't proceed, loop forever
   }
-
+  /*
+  WiFi.mode(WIFI_STA);
+  WiFi.STA.begin();
+  
+  Serial.print("MAC Address: ");
+  readMacAddress();
+  */
+  
   display.display();
   //delay(2000);
 
@@ -152,7 +162,11 @@ void loop()
   int redVal = digitalRead(RED);
   if (redVal == HIGH && redLast == LOW)
   {
+
     Serial.println("red pressed");
+
+    Serial.println("R");
+
     deleteFromDisplay();
   }
   redLast = redVal;
@@ -243,7 +257,7 @@ void readChar(keypadEvent e)
   Serial.print("ToPush = ");
   Serial.println(toPush);
 
-  peekToPush();
+  drawCursorBlock();
 }
 
 // Determines which number was pressed
@@ -263,7 +277,7 @@ void readDigit(keypadEvent e)
 
   toPush = 48 + key % 12;
 
-  peekToPush();
+  drawCursorBlock();
 }
 
 // Checks if the button press was the * or #, then perform that action
@@ -370,8 +384,8 @@ void cursorPulse()
 
   if (millis() > 2000 + lastTime && currentMode != RECV)
   {
-    Serial.println(lastTime);
     drawCursorBlock();
+    cursor = !cursor;
     lastTime = millis();
   }
     
@@ -386,7 +400,8 @@ void drawCursorBlock()
     display.fillRect(display.getCursorX(), display.getCursorY(), CHARWIDTH+1, 8, SSD1306_WHITE);
   }
   peekToPush();
-  cursor = !cursor;
+  if (toPush == '\0') 
+    display.display();
 }
 
 void peekToPush() 
@@ -426,3 +441,26 @@ void sendMessage(Msg msg, char keyword[]) {
   
   return;
 }
+
+void readMacAddress(){
+  uint8_t baseMac[6];
+  esp_err_t ret = esp_wifi_get_mac(WIFI_IF_STA, baseMac);
+
+  if(ret == ESP_OK){
+    Serial.printf("%02x:%02x:%02x:%02x:%02x:%02x", baseMac[0], baseMac[1], baseMac[2], baseMac[3], baseMac[4], baseMac[5]);
+  }else{
+    Serial.println("Failed to read MAC");
+  }
+
+}
+
+
+
+
+
+
+
+
+
+
+
