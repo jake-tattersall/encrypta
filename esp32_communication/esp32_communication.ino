@@ -90,7 +90,13 @@ inputMode currentMode = RECV;
 unsigned long lastTime = 0;
 bool cursor = false;
 
-char *keyword;
+typedef struct struct_message {
+  char msg[MAXCHARS];
+} struct_message;
+
+struct_message incoming_messages;
+
+char *keyword = (char*) malloc(MAXCHARS * sizeof(char));
 bool keyGiven = false;
 /*Establishing ESP-NOW*/
 
@@ -101,7 +107,13 @@ void OnDataSent(const uint8_t* mac_addr, esp_now_send_status_t status){
 
 char* recievedString = (char *)malloc(MAXCHARS);
 void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len){
-  memcpy(recievedString, incomingData, strlen(recievedString));
+  Serial.println("Data Received");
+  memcpy(&incoming_messages, incomingData, sizeof(incoming_messages));
+  int msg_len = strlen(incoming_messages.msg);
+  for (int i = 0; i < msg_len; i++) {
+    Serial.print(incoming_messages.msg[i]);
+  }
+  Serial.println();
 }
 
 
@@ -134,6 +146,8 @@ void setup()
   
   //Listen for when data is recieved
   esp_now_register_recv_cb(esp_now_recv_cb_t(OnDataRecv));
+
+  esp_now_register_send_cb(OnDataSent);
 
   display.display();
   //delay(2000);
@@ -230,13 +244,13 @@ void loop()
     Serial.println("G");
     if (keyGiven)
     {
-      char keyword[] = "test";
       sendMessage(msg, keyword);
     }
     else
     {
-      keyword = msg.chars;
-      memset(msg.chars, 0, sizeof(msg.chars));
+      strcpy(keyword, msg.chars);
+      //keyword = msg.chars;
+      //memset(msg.chars, 0, sizeof(msg.chars));
       keyGiven = true;
     }
     display.clearDisplay();
@@ -516,7 +530,7 @@ void sendMessage(Msg msg, char keyword[]) {
 
   Serial.print("keyword: ");
   Serial.println(keyword);
-  char* encryptedMsg= encryptByPlayfair(msg.chars, keyword);
+  char* encryptedMsg = encryptByPlayfair(msg.chars, keyword);
 
   Serial.print("Encrypted message: ");
   Serial.println(encryptedMsg);
@@ -526,7 +540,10 @@ void sendMessage(Msg msg, char keyword[]) {
   Serial.print("Decrypted message: ");
   Serial.println(decryptedMsg);
 
-  esp_err_t result = esp_now_send(broadcastAddress, (uint8_t*)encryptedMsg, sizeof(encryptedMsg));
+  struct_message to_send;
+  strcpy(to_send.msg, encryptedMsg);
+
+  esp_err_t result = esp_now_send(broadcastAddress, (uint8_t*) to_send, strlen(encryptedMsg) + 1);
 }  
 /*
 void readMacAddress(){
