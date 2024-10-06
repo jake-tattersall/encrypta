@@ -3,6 +3,10 @@
 
 #define SIZE 168
 
+char newStr[256];
+
+char decStr[256];
+
 void toLowerCase(char plain[], int ps)
 {
   int i; 
@@ -12,55 +16,49 @@ void toLowerCase(char plain[], int ps)
     {
       plain[i] += 32;
     }
-
   }
 }
 
 int removeSpaces(char* plain, int ps)
 {
   int i, count = 0;
-  for(i = 0; i < ps; i++){
-
-    
+  for(i = 0; i < ps; i++)
+  {
     if(plain[i] != ' ')
     {
       plain[count++] = plain[i];
     }
     plain[count] = '\0';
     return count;
-
-    
-
   }
+
+  return 0;
 }
 // Generating a 5x5 square for Playfair cipher, ks is key length
 void generateKeyTable(char key[], int ks, char keyT[5][5])
 {
   int i, j, k, flag = 0;
 
-
   int dicty[26] = {0};
   for(i = 0; i < ks; i++)
   {
-
     if(key[i] != 'j') //the letter "j" is what we're ommitting 
     {
       //put 2 in
       dicty[key[i] - 97] = 2;
     }
-
   }
+
   dicty['j' - 97] = 1;
   
   i = 0;
   j = 0;
+
   //fill table with keyword
   for(k = 0; k < ks; k++)
   {
-
     if(dicty[key[k] - 97] == 2)
     {
-
       dicty[key[k] - 97] -= 1; //reduce to 2nd letter of letter pair
       keyT[i][j] = key[k];
       j++;
@@ -71,11 +69,9 @@ void generateKeyTable(char key[], int ks, char keyT[5][5])
         i++;
         j = 0;
       }
-
-
     }
-  
   }
+
   //fills the rest of the table with the rest of alphabet
   for(k = 0; k < 26; k++)
   {
@@ -90,21 +86,11 @@ void generateKeyTable(char key[], int ks, char keyT[5][5])
       }
     }
   }
-
-
 }
 
 void search(char keyT[5][5], char a, char b, int arr[])
 {
   int i, j;
-
-  //replacing the letter "i" with our ommitted letter
-  if(a == 'j'){
-    a = 'i';
-  }
-  else if(b == 'j'){
-    b = 'i';
-  }
 
   for(i = 0; i < 5; i++)
   {
@@ -130,15 +116,54 @@ void search(char keyT[5][5], char a, char b, int arr[])
 
 int mod5(int a) {return (a % 5);}
 
-int prepare(char str[], int ptrs)
+void prepare(char str[], int ptrs)
 {
+  bool flag;
 
-  if(ptrs % 2 != 0){
-    str[ptrs++] = 'z'; //bogus letter, thinking about making it the first letter of the keyword
-    str[ptrs] = '\0';
+  int numPlaced = 0;
+
+  char A, B;
+
+  printf("%d\n", strlen(str));
+
+  for (int i = 0; i < strlen(str); i = i + 2)
+  {
+    // printf("%d\n", i);
+    flag = false;
+
+    A = str[i];
+
+    if (i + 1 >= strlen(str))
+      B = 'x';
+    else
+      B = str[i + 1];
+
+    if (A == B)
+    {
+        B = 'x';
+        flag = true;
+    }
+
+    if (A == 'i')
+        A = 'j';
+
+    if (B == 'i')
+        B = 'j';
+
+    if (A == 'x' && B == 'x')
+    {
+        B = 'q';
+        flag = true;
+    }
+
+    newStr[numPlaced++] = A;
+    newStr[numPlaced++] = B;
+
+    if (flag)
+        i--;
   }
 
-  return ptrs;
+  printf("%d\n", strlen(newStr));
 }
 
 char* encrypt(char str[], char keyT[5][5], int ps)
@@ -170,30 +195,52 @@ char* encrypt(char str[], char keyT[5][5], int ps)
 
 char* encryptByPlayfair(char str[], char key[])
 {
-    char ps, ks, keyT[5][5];
-    ks = strlen(key);
-    //ks = removeSpaces(key,ks);
-    toLowerCase(key,ks);
+  char keyT[5][5];
+  int ks, ps;
 
+  ks = strlen(key);
+  toLowerCase(key, ks);
 
-    //Serial.println(str);
-    Serial.println(key);
+  ps = strlen(str);
+  toLowerCase(str, ps);
 
+  for (int i = 0; i < ks; i++)
+    printf("%c", key[i]);
 
+  printf("\n");
 
-    ps = strlen(str);
-    toLowerCase(str, ps);
-    //ps = removeSpaces(str, ps);
-    
-    Serial.println(str);
-    ps = prepare(str, ps);
+  for (int i = 0; i < ps; i++)
+    printf("%c", str[i]);
 
-    generateKeyTable(key, ks ,keyT);
+  printf("\n");
 
-    encrypt(str, keyT, ps);
+  // Serial.println(str);
+  prepare(str, ps);
 
-  return str;
+  for (int i = 0; i < strlen(newStr); i++)
+    printf("%c", newStr[i]);
 
+  printf("\n");
+
+  generateKeyTable(key, ks, keyT);
+
+  for (int i = 0; i < 5; i++)
+  {
+    for (int j = 0; j < 5; j++)
+    {
+      printf("%c ", keyT[i][j]);
+    }
+    printf("\n");
+  }
+
+  encrypt(newStr, keyT, strlen(newStr));
+
+  for (int i = 0; i < strlen(newStr); i++)
+    printf("%c", newStr[i]);
+
+  printf("\n");
+
+  return newStr;
 }
 /*
 
@@ -258,7 +305,7 @@ char* decrypt(char str[], char keyT[5][5], int ps){
   int i, a[4];
   for(i = 0; i < ps; i += 2){
     search(keyT, str[i], str[i + 1], a);
-    Serial.println(str);
+    // Serial.println(str);
     if(a[0] == a[2])
     {
       str[i] = keyT[a[0]][overloadmod5(a[1] - 1)];
@@ -279,22 +326,66 @@ char* decrypt(char str[], char keyT[5][5], int ps){
   return str;
 }
 
-char* decryptPlayfair(char str[], char key[]){
+char* decryptPlayfair(char str[], char key[])
+{
   char ps, ks, keyT[5][5];
-  //Serial.println(str);
 
   ks = strlen(key);
-  toLowerCase(key, ks);
+  // toLowerCase(key, ks);
 
   ps = strlen(str);
-  toLowerCase(str, ps);
+  // toLowerCase(str, ps);
+
+  generateKeyTable(key, strlen(key), keyT);
+
+  for (int i = 0; i < 5; i++)
+  {
+    for (int j = 0; j < 5; j++)
+    {
+      printf("%c ", keyT[i][j]);
+    }
+    printf("\n");
+  }
   
-  //Serial.println(str);
+  for (int i = 0; i < strlen(str); i++)
+    printf("%c", str[i]);
 
-  keyTableDecrypt(key, ks, keyT);
+  printf("\n");
 
-  decrypt(str, keyT, ps);
-  Serial.println(str);
+  decrypt(str, keyT, strlen(str));
+
+  for (int i = 0; i < strlen(str); i++)
+    printf("%c", str[i]);
+
+  printf("\n");
+  
+  printf("%d\n", strlen(str));
+
+  int numPlaced = 0;
+
+  for (int i = 0; i < strlen(str); i++)
+  {
+    if (str[i] == 'x')
+    {
+      if (i + 1 == strlen(str))
+        continue;
+
+      if (str[i-1] == str[i+1])
+      {
+        decStr[numPlaced++] = str[i-1];
+        i++;
+        continue;
+      }
+    }
+
+    decStr[numPlaced++] = str[i];
+  }
+
+  for (int i = 0; i < strlen(decStr); i++)
+    printf("%c", decStr[i]);
+
+  printf("\n");
+
   return str;
 
 }
